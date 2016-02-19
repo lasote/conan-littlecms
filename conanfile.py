@@ -2,6 +2,7 @@ from conans import ConanFile, ConfigureEnvironment
 import os
 from conans.tools import download, unzip, replace_in_file
 from conans import CMake
+from shutil import copyfile
 
 
 class ZlibNgConan(ConanFile):
@@ -15,6 +16,13 @@ class ZlibNgConan(ConanFile):
     exports = ["CMakeLists.txt"]
     url="http://github.com/lasote/conan-littlecms"
     license="https://github.com/mm2/Little-CMS/blob/master/COPYING"
+    
+    def config(self):
+        
+        if self.settings.os == "Windows":
+            self.options.remove("shared")
+        else:
+            self.options.add("shared")
 
     def source(self):
         zip_name = "lcms2-%s.tar.gz" % self.version
@@ -23,6 +31,8 @@ class ZlibNgConan(ConanFile):
         os.unlink(zip_name)
         if self.settings.os != "Windows":
             self.run("chmod +x ./%s/configure" % self.ZIP_FOLDER_NAME)
+        else:
+            copyfile("CMakeLists.txt", os.path.join(self.ZIP_FOLDER_NAME, "CMakeLists.txt"))
 
     def build(self):
         """ Define your project building. You decide the way of building it
@@ -36,11 +46,16 @@ class ZlibNgConan(ConanFile):
                 replace_in_file("./%s/configure" % self.ZIP_FOLDER_NAME, old_str, new_str)
             
             env = ConfigureEnvironment(self.deps_cpp_info, self.settings)
-            print(env.command_line)
             self.run("cd %s && %s ./configure" % (self.ZIP_FOLDER_NAME, env.command_line))
             self.run("cd %s && %s make" % (self.ZIP_FOLDER_NAME, env.command_line))
         else:
-            pass
+            cmake = CMake(self.settings)
+            self.run("cd %s && mkdir _build" % self.ZIP_FOLDER_NAME)
+            cd_build = "cd %s/_build" % self.ZIP_FOLDER_NAME
+            self.output.warn('%s && cmake .. %s' % (cd_build, cmake.command_line))
+            self.run('%s && cmake .. %s' % (cd_build, cmake.command_line))
+            self.output.warn("%s && cmake --build . %s" % (cd_build, cmake.build_config))
+            self.run("%s && cmake --build . %s" % (cd_build, cmake.build_config))
 
     def package(self):
         """ Define your conan structure: headers, libs, bins and data. After building your
@@ -50,13 +65,8 @@ class ZlibNgConan(ConanFile):
         self.copy("*.h", "include", "%s" % (self.ZIP_FOLDER_NAME), keep_path=False)
         self.copy("*.h", "include", "%s" % ("_build"), keep_path=False)
 
-        # Copying static and dynamic libs
         if self.settings.os == "Windows":
-            if self.options.shared:
-                self.copy(pattern="*.dll", dst="bin", src="", keep_path=False)
-                self.copy(pattern="*.lib", dst="lib", src="", keep_path=False)
-            else:
-                self.copy(pattern="*.lib", dst="lib", src="", keep_path=False)
+            self.copy(pattern="*lcms2.lib", dst="lib", src="", keep_path=False)
         else:
             if self.options.shared:
                 if self.settings.os == "Macos":
@@ -69,6 +79,6 @@ class ZlibNgConan(ConanFile):
     def package_info(self):
         
         if self.settings.os == "Windows":
-            pass
+            self.cpp_info.libs = ['lcms2']
         else:
             self.cpp_info.libs = ['lcms2', 'm']

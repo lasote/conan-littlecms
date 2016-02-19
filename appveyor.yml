@@ -5,7 +5,7 @@ environment:
     PYTHON_ARCH: "32"
     
     # CONAN_UPLOAD: 0
-    CONAN_REFERENCE: "zlib-ng/1.2.8"
+    CONAN_REFERENCE: "littlecms/2.7"
     CONAN_USERNAME: "lasote"
     CONAN_CHANNEL: "ci"
     CONAN_TOTAL_PAGES: 4

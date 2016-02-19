@@ -1,7 +1,7 @@
 env:
  global:
    #- CONAN_UPLOAD: 1
-   - CONAN_REFERENCE: "zlib-ng/1.2.8"
+   - CONAN_REFERENCE: "littlecms/2.7"
    - CONAN_USERNAME: "lasote"
    - CONAN_CHANNEL: "ci"
    - CONAN_TOTAL_PAGES: 1

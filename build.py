@@ -28,8 +28,16 @@ if __name__ == "__main__":
     args = " ".join(sys.argv[1:])
     builder = ConanMultiPackager(args, username, channel)
     builder.add_common_builds(shared_option_name="littlecms:shared", visual_versions=[10, 12, 14])
-    print(builder.builds)
-
+    
+    if platform.system() == "Windows":
+        # Remove shared builds in windows
+        static_builds = []
+        for build in builder.builds:
+            if not build[1]["littlecms:shared"]:
+                static_builds.append([build[0], {}])
+            
+        builder.builds = static_builds   
+    
     if use_docker:  
         builder.docker_pack(current_page, total_pages, gcc_versions)
     else:
