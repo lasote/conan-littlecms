@@ -21,8 +21,6 @@ class ZlibNgConan(ConanFile):
         
         if self.settings.os == "Windows":
             self.options.remove("shared")
-        else:
-            self.options.add("shared")
 
     def source(self):
         zip_name = "lcms2-%s.tar.gz" % self.version
