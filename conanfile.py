@@ -18,6 +18,10 @@ class ZlibNgConan(ConanFile):
     license="https://github.com/mm2/Little-CMS/blob/master/COPYING"
     
     def config(self):
+        try: # Try catch can be removed when conan 0.8 is released
+            del self.settings.compiler.libcxx 
+        except: 
+            pass
         
         if self.settings.os == "Windows":
             self.options.remove("shared")
