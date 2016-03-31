@@ -50,7 +50,7 @@ class ZlibNgConan(ConanFile):
             
             env = ConfigureEnvironment(self.deps_cpp_info, self.settings)
             if self.options.fPIC:
-                 env_line = env.command_line.replace('CFLAGS=" "', 'CFLAGS="-fPIC"')
+                 env_line = env.command_line.replace('CFLAGS="', 'CFLAGS="-fPIC ')
             else:
                  env_line = env.command_line
 
