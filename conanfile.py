@@ -11,8 +11,8 @@ class ZlibNgConan(ConanFile):
     ZIP_FOLDER_NAME = "lcms2-%s" % version 
     generators = "cmake"
     settings = "os", "arch", "compiler", "build_type"
-    options = {"shared": [True, False]}
-    default_options = "shared=False"
+    options = {"shared": [True, False], "fPIC": [True, False]}
+    default_options = "shared=False", "fPIC=True"
     exports = ["CMakeLists.txt"]
     url="http://github.com/lasote/conan-littlecms"
     license="https://github.com/mm2/Little-CMS/blob/master/COPYING"
@@ -48,8 +48,13 @@ class ZlibNgConan(ConanFile):
                 replace_in_file("./%s/configure" % self.ZIP_FOLDER_NAME, old_str, new_str)
             
             env = ConfigureEnvironment(self.deps_cpp_info, self.settings)
-            self.run("cd %s && %s ./configure" % (self.ZIP_FOLDER_NAME, env.command_line))
-            self.run("cd %s && %s make" % (self.ZIP_FOLDER_NAME, env.command_line))
+            if self.options.fPIC:
+                 env_line = env.command_line.replace('CFLAGS="', 'CFLAGS="-fPIC ')
+            else:
+                 env_line = env.command_line
+
+            self.run("cd %s && %s ./configure" % (self.ZIP_FOLDER_NAME, env_line))
+            self.run("cd %s && %s make" % (self.ZIP_FOLDER_NAME, env_line))
         else:
             cmake = CMake(self.settings)
             self.run("cd %s && mkdir _build" % self.ZIP_FOLDER_NAME)
