@@ -24,7 +24,7 @@ class ZlibNgConan(ConanFile):
             pass
         
         if self.settings.os == "Windows":
-            self.options.remove("shared")
+            self.options.remove("fPIC")
 
     def source(self):
         zip_name = "lcms2-%s.tar.gz" % self.version
@@ -55,7 +55,8 @@ class ZlibNgConan(ConanFile):
             self.run("cd %s && mkdir _build" % self.ZIP_FOLDER_NAME)
             cd_build = "cd %s/_build" % self.ZIP_FOLDER_NAME
             self.output.warn('%s && cmake .. %s' % (cd_build, cmake.command_line))
-            self.run('%s && cmake .. %s' % (cd_build, cmake.command_line))
+            shared_line = "-DBUILD_SHARED_LIBS=ON" if self.options.shared else ""
+            self.run('%s && cmake .. %s %s' % (cd_build, cmake.command_line, shared_line))
             self.output.warn("%s && cmake --build . %s" % (cd_build, cmake.build_config))
             self.run("%s && cmake --build . %s" % (cd_build, cmake.build_config))
 
@@ -69,6 +70,7 @@ class ZlibNgConan(ConanFile):
 
         if self.settings.os == "Windows":
             self.copy(pattern="*lcms2.lib", dst="lib", src="", keep_path=False)
+            self.copy(pattern="*.dll", dst="bin", src=os.path.join(self.ZIP_FOLDER_NAME, "_build"), keep_path=False)
         else:
             if self.options.shared:
                 if self.settings.os == "Macos":

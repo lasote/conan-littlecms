@@ -10,6 +10,7 @@ project(
     VERSION 2.7
     LANGUAGES C
 )
+option (BUILD_SHARED_LIBS "Build Shared Libraries" OFF) 
 
 include(FeatureSummary)
 
@@ -25,8 +26,16 @@ include_directories("${CMAKE_CURRENT_SOURCE_DIR}/include")
 file(GLOB SRCS src/*.c)
 file(GLOB HDRS include/*.h)
 
-add_library(${LIBTARGET} STATIC ${SRCS} ${HDRS})
- 
+if(WIN32)
+    set(VCSHAREDFILES src/lcms2.def Projects/VC2013/lcms2.rc)
+endif()
+
+if(BUILD_SHARED_LIBS)
+    add_library(${LIBTARGET} SHARED ${SRCS} ${HDRS} ${VCSHAREDFILES})    
+else()
+    add_library(${LIBTARGET} STATIC ${SRCS} ${HDRS})
+endif()
+
 if (BUILD_TOOLS)
     find_package(JPEG)
     find_package(TIFF)
